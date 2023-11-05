@@ -21,12 +21,14 @@ app.use(express.urlencoded({
 
 //Konfigurasi flash
 app.use(cookieParser('secret'));
-app.use( 
+app.use(
     session({
-    cookie: {maxAge: 6000},
-    secret: 'secret',
-    saveUninitialized: true,
-})
+        cookie: {
+            maxAge: 6000
+        },
+        secret: 'secret',
+        saveUninitialized: true,
+    })
 );
 app.use(flash());
 
@@ -59,7 +61,7 @@ app.get('/about', (req, res) => {
 })
 
 //Halaman contact
-app.get('/contact', async (req,res)=>{
+app.get('/contact', async (req, res) => {
     // const contacts = Contact.find().then((contact)=>{
     //     res.send(contact);
     // });
@@ -73,6 +75,20 @@ app.get('/contact', async (req,res)=>{
         msg: req.flash('msg'),
     });
 })
+
+//Halaman detail contact
+app.get('/contact/:nama', async (req, res) => {
+    //     const contact = findContact(req.params.nama);
+    const contact = await Contact.findOne({
+        nama: req.params.nama
+    });
+
+    res.render('detail', {
+        title: 'Halaman Detail Contact',
+        layout: 'layouts/main-layout',
+        contact,
+    });
+});
 
 app.listen(port, () => {
     console.log(`Mongo Contact App | Listening at https://localhost:${port}`);

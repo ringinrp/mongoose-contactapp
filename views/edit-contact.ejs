@@ -15,7 +15,8 @@
 
       <!-- edit adalah routes untuk nampilin formnya sedangkan update routes untuk proses perubahan datanya-->
 
-      <form method="post" action="/contact/update">
+      <form method="post" action="/contact?_method=PUT">
+        <input type="hidden" name="_id" value="<%= contact._id %>">
         <input type="hidden" name="oldName" value="<%= contact.oldName || contact.nama %>">
 
         <div class="mb-3">

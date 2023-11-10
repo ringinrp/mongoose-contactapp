@@ -20,12 +20,22 @@
           <a href="/contact/edit/<%= contact.nama %>" class="btn btn-info badge"
             >Edit</a
           >
-          <a
+          <!-- <a
             href="/contact/delete/<%= contact.nama %>"
             class="btn btn-danger badge"
             onclick="return confirm('Apakah data akan dihapus?');"
             >Delete</a
-          >
+          > -->
+          <form action="/contact?_method=DELETE" method="POST" class="d-inline">
+            <input type="hidden" name="nama" value="<%= contact.nama %>" />
+            <button
+              type="submit"
+              class="btn btn-danger badge"
+              onclick="return confirm('Apakah data akan dihapus ??')"
+            >
+              hapus
+            </button>
+          </form>
           <a href="/contact" class="card-link d-block mt-3">&laquo; Kembali</a>
         </div>
       </div>

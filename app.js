@@ -1,6 +1,13 @@
 const express = require('express');
 const expressLayouts = require('express-ejs-layouts');
 
+const {
+    body,
+    validationResult,
+    check
+} = require('express-validator');
+const methodOverride = require('method-override');
+
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const flash = require('connect-flash');
@@ -10,6 +17,9 @@ const Contact = require('./model/contact');
 
 const app = express();
 const port = 3000;
+
+//setup method override
+app.use(methodOverride('_method'));
 
 //Setup EJS
 app.set('view engine', 'ejs');
@@ -75,6 +85,78 @@ app.get('/contact', async (req, res) => {
         msg: req.flash('msg'),
     });
 })
+
+//Halaman form tambah data contact
+app.get('/contact/add', (req, res) => {
+    res.render('add-contact', {
+        title: 'Form Tambah Data Contact',
+        layout: 'layouts/main-layout',
+    });
+});
+
+//Proses tambah data contact
+app.post('/contact', [
+    body('nama').custom(async (value) => {
+        const duplikat = await Contact.findOne({
+            nama: value
+        });
+        if (duplikat) {
+            throw new Error('Nama sudah digunakan!!');
+        }
+        return true;
+    }),
+    check('email', 'Email tidak valid!').isEmail(),
+    check('nohp', 'Nomer Handphone tidak valid!').isMobilePhone('id-ID')
+], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        // return res.status(404).json({errors: errors.array()});
+        res.render('add-contact', {
+            title: 'Form tambah data contact',
+            layout: 'layouts/main-layout',
+            errors: errors.array(),
+        })
+    } else {
+        Contact.insertMany(req.body, (error, result) => {
+            //kirim flash messsage
+            req.flash('msg', 'Data contact berhasil ditambahkan');
+            res.redirect('/contact');
+        })
+    }
+})
+
+//proses delete contact
+// app.get('/contact/delete/:nama', async (req, res)=>{
+//     const contact =await Contact.findOne({nama : req.params.nama});
+
+//     //jika contact tidak ada
+//     if(!contact){
+//         res.status(404);
+//         res.send('<h1>404</h1>')
+//     }else{
+//         Contact.deleteMany({_id : contact._id}).then((result)=>{
+//             req.flash('msg', 'Data contact berhasil ditambahkan');
+//             res.redirect('/contact');
+//         });
+//     }
+// });
+app.delete('/contact', (req, res) => {
+    Contact.deleteOne({nama: req.body.nama}).then((result)=>{
+        req.flash('msg', 'Data contact berhasil ditambahkan');
+        res.redirect('/contact');
+    });
+});
+
+//halaman form edit data contact
+app.get('/contact/edit/:nama',async (req, res) => {
+    const contact = await Contact.findOne({nama : req.params.nama})
+
+    res.render('edit-contact', {
+        title: 'Form Ubah Data Contact',
+        layout: 'layouts/main-layout',
+        contact,
+    });
+});
 
 //Halaman detail contact
 app.get('/contact/:nama', async (req, res) => {
